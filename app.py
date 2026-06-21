@@ -37,7 +37,11 @@ LOAN_OPTIONS = [
     "Auto Loan", "Credit-Builder Loan", "Personal Loan", "Home Equity Loan",
     "Mortgage Loan", "Student Loan", "Debt Consolidation Loan", "Payday Loan",
 ]
-
+OCCUPATION_OPTIONS = [
+    "Engineer", "Lawyer", "Architect", "Media_Manager", "Accountant",
+    "Entrepreneur", "Developer", "Scientist", "Teacher", "Mechanic", "Journalist", "Doctor", "Manager",
+    "Musician", "Writer", "Unknown"
+]
 with st.form("credit_form"):
     st.subheader("Data Nasabah")
 
@@ -45,7 +49,7 @@ with st.form("credit_form"):
     with col1:
         month = st.selectbox("Month", MONTHS)
         age = st.number_input("Age", min_value=0, max_value=120, value=30)
-        occupation = st.text_input("Occupation", value="Engineer")
+        occupation = st.selectbox("Occupation", OCCUPATION_OPTIONS)
         annual_income = st.number_input("Annual Income", min_value=0.0, value=50000.0, step=1000.0)
         monthly_salary = st.number_input("Monthly Inhand Salary", min_value=0.0, value=4000.0, step=100.0)
         num_bank_accounts = st.number_input("Num Bank Accounts", min_value=0, max_value=20, value=3)
