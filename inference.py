@@ -19,8 +19,7 @@ import joblib
 import pandas as pd
 import json
 
-from train import CreditScorePreprocessor
-
+from preprocess import CreditScorePreprocessor
 
 class CreditScorePredictor:
     """Wrapper inferencing: raw dict -> cleaning -> encoding -> prediksi."""
