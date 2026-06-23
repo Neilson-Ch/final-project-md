@@ -17,6 +17,7 @@ Dipakai oleh:
 from pathlib import Path
 import joblib
 import pandas as pd
+import json
 
 from train import CreditScorePreprocessor
 
@@ -123,6 +124,51 @@ class CreditScorePredictor:
         """Prediksi banyak record sekaligus. Tiap dict divalidasi & diproses satu-satu
         agar pesan error tetap jelas menunjuk record mana yang bermasalah."""
         return [self.predict(raw) for raw in raw_list]
+
+# ═════════════════════════════════════════════════════════════════════
+#  AWS SAGEMAKER HANDLER FUNCTIONS (WAJIB ADA DI TOP-LEVEL)
+# ═════════════════════════════════════════════════════════════════════
+
+def model_fn(model_dir):
+    """
+    1. Memuat model ketika container SageMaker aktif.
+    model_dir adalah folder tempat SageMaker mengekstrak isi 'model.tar.gz'.
+    """
+    print(f"Loading model from directory: {model_dir}")
+    # Mengarahkan artifact_dir langsung ke direktori ekstrak SageMaker
+    return CreditScorePredictor(artifact_dir=model_dir)
+
+
+def input_fn(request_body, request_content_type):
+    """
+    2. Menerima request HTTP dari klien dan mengubahnya menjadi tipe data Python (dict/list).
+    """
+    if request_content_type == "application/json":
+        return json.loads(request_body)
+    else:
+        raise ValueError(f"Content type {request_content_type} tidak didukung.")
+
+
+def predict_fn(input_data, model):
+    """
+    3. Mengeksekusi logika prediksi menggunakan objek predictor dari model_fn.
+    """
+    # Mengantisipasi jika input dikirim dalam format {"instances": [ {...} ]} atau langsung list/dict
+    if isinstance(input_data, dict):
+        if "instances" in input_data:
+            return model.predict_batch(input_data["instances"])
+        return model.predict(input_data)
+    elif isinstance(input_data, list):
+        return model.predict_batch(input_data)
+    else:
+        raise ValueError("Format input harus berupa Dictionary atau List dari Dictionary.")
+
+
+def output_fn(prediction, content_type):
+    """
+    4. Mengemas hasil prediksi menjadi format JSON string untuk dikembalikan ke klien.
+    """
+    return json.dumps(prediction), "application/json"
 
 
 if __name__ == "__main__":

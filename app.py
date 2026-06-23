@@ -42,6 +42,7 @@ OCCUPATION_OPTIONS = [
     "Entrepreneur", "Developer", "Scientist", "Teacher", "Mechanic", "Journalist", "Doctor", "Manager",
     "Musician", "Writer", "Unknown"
 ]
+
 with st.form("credit_form"):
     st.subheader("Data Nasabah")
 
