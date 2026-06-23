@@ -11,9 +11,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-from catboost import CatBoostClassifier
-from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 class CreditScorePreprocessor:
