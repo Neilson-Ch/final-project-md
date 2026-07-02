@@ -11,6 +11,9 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
+from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 class CreditScorePreprocessor:
@@ -142,7 +145,7 @@ class CreditScorePreprocessor:
             c for c in x_train.select_dtypes(include=["int64", "float64"]).columns
             if c not in exclude_cols
         ]
-        cat_feat = ["Occupation", "Payment_Behaviour", "Credit_Mix", "Payment_of_Min_Amount"]
+        cat_feat = ["Occupation", "Payment_Behaviour", "Payment_of_Min_Amount"]
  
         numeric_pipeline = Pipeline([
             ("num_imputer", SimpleImputer(strategy="median")),
