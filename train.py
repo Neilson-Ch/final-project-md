@@ -45,10 +45,13 @@ class CreditScoreModelTrainer:
         return {
             "RandomForest": {
                 "model_class": RandomForestClassifier,
-                "param_grid": [
-                    {"n_estimators": 100, "max_depth": 5},
-                    {"n_estimators": 200, "max_depth": 10},
-                    {"n_estimators": 300, "max_depth": 10},
+                 "param_grid": [
+                    {
+                        "max_depth": None,
+                        "min_samples_leaf": 1,
+                        "min_samples_split": 2,
+                        "n_estimators": 100,
+                    }
                 ],
                 "fixed_params": {"random_state": self.random_state, "n_jobs": -1},
             },
@@ -60,15 +63,6 @@ class CreditScoreModelTrainer:
                     {"n_estimators": 300, "max_depth": 8},
                 ],
                 "fixed_params": {"eval_metric": "mlogloss", "random_state": self.random_state},
-            },
-            "CatBoost": {
-                "model_class": CatBoostClassifier,
-                "param_grid": [
-                    {"iterations": 100, "depth": 4},
-                    {"iterations": 200, "depth": 6},
-                    {"iterations": 300, "depth": 8},
-                ],
-                "fixed_params": {"verbose": 0, "random_state": self.random_state},
             },
         }
 
@@ -158,8 +152,51 @@ class CreditScoreModelTrainer:
         print(f"\n🏆 Terpilih: {best_p1_name} (Val F1={best_p1_score:.4f}) -> lanjut tuning")
 
         # ── Phase 2: tune model terpilih ──────────────────────────────────────
-        tune_result = self._tune_model(best_p1_name, transformer, x_train, y_train, x_val, y_val)
+        if best_p1_name == "RandomForest":
+            tune_result = self._tune_model(
+                name="RandomForest",
+                transformer=transformer,
+                x_train=x_train,
+                y_train=y_train,
+                x_val=x_val,
+                y_val=y_val,
+            )
 
+            tuned_pipeline, tuned_score, tuned_run_id = tune_result
+
+            # Jangan gunakan hasil tuning jika performanya lebih buruk
+            if tuned_score >= best_p1_score:
+                final_pipeline = tuned_pipeline
+                final_score = tuned_score
+                final_run_id = tuned_run_id
+
+                print(
+                    f"✅ Final Random Forest hasil tuning "
+                    f"(Val F1={final_score:.4f})"
+                )
+            else:
+                final_pipeline = best_p1_pipeline
+                final_score = best_p1_score
+                final_run_id = best_p1_run_id
+
+                print(
+                    f"⚠️ Tuning tidak meningkatkan performa. "
+                    f"Menggunakan Random Forest baseline "
+                    f"(Val F1={final_score:.4f})"
+                )
+
+        else:
+            # Jika model terbaik ternyata bukan Random Forest,
+            # jangan tuning model lain.
+            final_pipeline = best_p1_pipeline
+            final_score = best_p1_score
+            final_run_id = best_p1_run_id
+
+            print(
+                f"ℹ️ Best model adalah {best_p1_name}. "
+                "Tuning Random Forest dilewati."
+            )
+            
         if tune_result is not None:
             final_pipeline, final_score, final_run_id = tune_result
             print(f"✅ Setelah tuning: {best_p1_name} Val F1={final_score:.4f}")
