@@ -2,7 +2,7 @@ import mlflow
 import mlflow.sklearn
 import pandas as pd
 from typing import Tuple
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 class ModelEvaluator:
     """Handles pulling the pipeline back out from MLflow tracking and validating it."""
@@ -18,12 +18,16 @@ class ModelEvaluator:
         acc = accuracy_score(y_test, preds)
         prec = precision_score(y_test, preds, average="macro")
         rec = recall_score(y_test, preds, average="macro")
+        f1 = f1_score(y_test, preds, average="weighted")
+
+        
 
         # Log metric results to the active MLflow run context
         with mlflow.start_run(run_id=run_id):
             mlflow.log_metric("accuracy", acc)
             mlflow.log_metric("precision", prec)
             mlflow.log_metric("recall", rec)
-
+            mlflow.log_metric("f1_weighted", f1)
+            
         print(f"Evaluation completed | Accuracy = {acc:.3f} | Precision = {prec:.3f} | Recall = {rec:.3f}")
-        return acc, prec, rec
+        return acc, prec, rec, f1
